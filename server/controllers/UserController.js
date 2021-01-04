@@ -83,7 +83,7 @@ module.exports = {
         res.status(200).json(result.rows)
     },
     deceptions: async (req,res,next) => {
-        //récupération du user connectée
+        //récupération du user connecté
         let user = req.user
 
         // Récupération de la liste déceptions d'un utilisateur
