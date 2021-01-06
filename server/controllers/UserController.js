@@ -34,6 +34,12 @@ module.exports = {
                 text: "INSERT INTO users (pseudo,email,password) VALUES ($1,$2,$3)",
                 values: [pseudo,email,hashedPassword]
             })
+            let result = await client.query({ // notez le "await" car la fonction est asynchrone
+                text: "SELECT * FROM users ORDER BY id DESC LIMIT 1",
+            })
+            //Création de la session
+            req.session.userId = result.rows[0].id
+            req.session.save()
             res.status(200).json({message: "Utilisateur enregistré avec succès"})
         }
 

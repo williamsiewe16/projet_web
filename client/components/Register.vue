@@ -1,41 +1,83 @@
 <template>
-    <form @submit.prevent="register">
-        <div>
-            <h2>Inscription</h2>
-            <div>
-                <label>Email: </label>
-                <input type="email" v-model="user.email" placeholder="Email" required/>
-            </div><br/>
-            <div>
-                <label>Password: </label>
-                <input type="password" v-model="user.password" placeholder="Password" required/>
-            </div><br/>
-            <input type="submit" value="Valider"/>
+    <div>
+        <div class="limiter">
+            <div class="container-login100">
+                <div class="wrap-login100">
+                    <form class="login100-form validate-form" @submit.prevent="register">
+					    <span class="login100-form-title p-b-34">
+					    	INSCRIPTION
+					    </span>
+
+                        <!-- Email -->
+                        <div class="wrap-input100 validate-input m-b-20" data-validate="Type Email">
+                            <input v-model="user.email" class="input100" type="text" name="email" placeholder="Email">
+                            <span class="focus-input100"></span>
+                        </div>
+
+                        <!-- Pseudo -->
+                        <div class="wrap-input100 validate-input m-b-20" data-validate="Type Pseudo">
+                            <input v-model="user.pseudo" class="input100" type="text" name="email" placeholder="Pseudo">
+                            <span class="focus-input100"></span>
+                        </div>
+
+                        <!-- Mot de passe -->
+                        <div class="wrap-input100 validate-input m-b-20" data-validate="Type password">
+                            <input v-model="user.password" class="input100" type="password" name="pass" placeholder="Mot de passe">
+                            <span class="focus-input100"></span>
+                        </div>
+
+                        <div class="container-login100-form-btn">
+                            <button class="login100-form-btn">
+                                VALIDER
+                            </button>
+                        </div>
+
+                        <div class="w-full text-center p-t-27 p-b-239">
+						    <span class="txt1">
+						    	Déjà un compte ?
+						    </span>
+                            <router-link to="/login" class="txt2">
+                                Connectez-vous
+                            </router-link>
+                        </div>
+                    </form>
+                    <div class="login100-more" :style="'background-image: url(\'../src/images/pexels-clem-onojeghuo-375885.jpg\')'"></div>
+                </div>
+            </div>
         </div>
-     </form>
+        <div class="notification is-danger is-light alert_" v-show="alert.display">
+            <button class="delete"></button>
+            Primar lorem ipsum dolor sit amet, consectetur
+            adipiscing elit lorem ipsum dolor. <strong>Pellentesque risus mi</strong>, tempus quis placerat ut, porta nec nulla. Vestibulum rhoncus ac ex sit amet fringilla. Nullam gravida purus diam, et dictum <a>felis venenatis</a> efficitur. Sit amet,
+            consectetur adipiscing elit
+        </div>
+    </div>
 </template>
  
 <script>
-
-module.exports = {
-  data () {
-    return {
-        user: {
-           email: "",
-           password: "", 
-        },
-    }
-  },
-  methods: {
-        register () {
-            if(this.user.email != "" && this.user.password != ""){
-                this.$emit('register', this.user)
-            }else{
-                alert("remplissez tous les champs")
+    module.exports = {
+        data () {
+            return {
+                user: {
+                    email: "",
+                    pseudo: "",
+                    password: ""
+                },
+                alert: {
+                  display: false,
+                }
             }
-         },
-  }
-}
+        },
+        methods: {
+            register () {
+                if(this.user.email != "" && this.user.password != ""){
+                    this.$emit('register', this.user)
+                }else{
+                    alert("remplissez tous les champs")
+                }
+            },
+        }
+    }
 </script>
  
 <style>

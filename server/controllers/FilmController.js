@@ -147,7 +147,7 @@ module.exports = {
                     text: "SELECT film_id,AVG(rating) as note FROM ratings WHERE film_id=$1 GROUP BY film_id",
                     values: [film.id]
                 })
-                film.note = Math.round(result.rows[0].note*100)/100
+                film.note = result.rows[0] ? Math.round(result.rows[0].note*100)/100 : 0
             }
             res.status(200).json(film)
         }

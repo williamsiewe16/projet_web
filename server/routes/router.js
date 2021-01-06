@@ -15,19 +15,19 @@ let router = (() => {
      */
 
     /** connexion */
-    router.route('user/login').post(UserController.login)
+    router.route('/user/login').post(UserController.login)
 
     /** Inscription */
-    router.route('user/register').post(UserController.register)
+    router.route('/user/register').post(UserController.register)
 
     /** Récupération de l'utilisateur connecté */
-    router.route('user/me').get(checkAuth,UserController.me)
+    router.route('/user/me').get(checkAuth,UserController.me)
 
     /** Récupération des likes d'un utilisateur */
-    router.route('/user/likes').get(/*checkAuth,*/ UserController.likes)
+    router.route('/user/likes').get(checkAuth, UserController.likes)
 
     /** Récupération des déceptions d'un utilisateur */
-    router.route('/user/deceptions').get(/*checkAuth,*/ UserController.deceptions)
+    router.route('/user/deceptions').get(checkAuth, UserController.deceptions)
 
 
     /****  FilmController

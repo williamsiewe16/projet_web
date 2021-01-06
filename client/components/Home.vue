@@ -1,129 +1,124 @@
 <template>
-  <div>
-    <article v-for="article in articles" :key="article.id">
-      <div class="article-img">
-        <div :style="{ backgroundImage: 'url(' + article.image + ')' }">
+    <div>
+        <!-- Content -->
+        <div class="content">
+            <h3 class="sub">Fresh <span>Movies</span></h3>
+            <ul class="movies">
+                <li v-for="film in films" :key="film.id" class="film">
+                    <div class="detail" data-toggle="modal" data-target="#filmModal" @click="afficherDetail(film)">
+                        <img :src="image_url+film.posterimage" width="60%" height="70%"/>
+                        <h5 class="title">{{film.title}}</h5>
+                    </div>
+                    <div class="icons">
+                        <i class="far fa-heart"></i>
+                        <i class="far fa-thumbs-down"></i>
+                    </div>
+                </li>
+            </ul>
         </div>
-      </div>
-      <div class="article-content" v-if="editingArticle.id !== article.id">
-        <div class="article-title">
-          <h2>{{ article.name }} - {{ article.price }}€</h2>
-          <div>
-          <button @click="deleteArticle(article.id)">Supprimer</button>
-          <button @click="editArticle(article)">Modifier</button>
 
-          <button v-if="!inPanier(article)" @click="addToPanier(article.id)"> Ajouter au panier</button>
-          <button v-else @click="removeFromPanier(article.id)"> Retirer du panier</button>
-
-          </div>
+        <!-- filmModal -->
+        <div class="modal fade" id="filmModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+            <div class="modal-dialog" role="document">
+                <div class="modal-content">
+                    <div class="filmDetail">
+                        <div class="section1">
+                            <img :src="filmDetail.image" class="backImage"/>
+                            <h4 class="titleZone">{{filmDetail.title}}</h4>
+                            <div class="textZone">
+                                <span style="color: grey">{{filmDetail.releaseDate}}</span>
+                                <div style="display: flex; justify-content: space-around">
+                                    <span>{{filmDetail.rating}}</span>
+                                    <div class="rating" data-rate-value=6></div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="section2">
+                            <b>Description</b>
+                            <div>
+                                <div>{{filmDetail.description}}</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
-        <p>{{ article.description }}</p>
-      </div>
-      <div class="article-content" v-else>
-        <div class="article-title">
-          <h2><input type="text" v-model="editingArticle.name"> - <input type="number" v-model="editingArticle.price"></h2>
-          <div>
-            <button @click="sendEditArticle()">Valider</button>
-            <button @click="abortEditArticle()">Annuler</button>
-          </div>
-        </div>
-        <p><textarea v-model="editingArticle.description"></textarea></p>
-        <input type="text" v-model="editingArticle.image" placeholder="Lien vers l'image">
-      </div>
-    </article>
-    <button @click="showForm = !showForm"> Afficher le formulaire</button>
-    
-    <add-article @add-article="addArticle" :show="showForm"></add-article>
-  </div>
+    </div>
 </template>
 
 <script>
-const AddArticle = window.httpVueLoader('./components/AddArticle.vue')
-module.exports = {
-  components: {
-    AddArticle
-  },
-  props: {
-    articles: { type: Array, default: [] },
-    panier: { type: Object }
-  },
-  data () {
-    return {
-      showForm: false,
-      editingArticle: {
-        id: -1,
-        name: '',
-        description: '',
-        image: '',
-        price: 0
-      }
+    module.exports =  {
+        name: "Home",
+        props: {
+            films: { type: Array },
+            image_url: String
+        },
+        data(){
+            return{
+                filmDetail: {
+                    title: "",
+                    image: "",
+                    description: "",
+                    releaseDate: "",
+                    rating: 0
+                }
+            }
+        },
+        mounted(){
+            $(".rating").rate();
+            let options = {
+                max_value: 6,
+                step_size: 0.5,
+            }
+            $(".rating").rate(options);
+            $(".rating").on("change", function(ev, data){
+                alert(data.to);
+            });
+        },
+        methods: {
+            afficherDetail: async function(film){
+                let res = await axios.get(`/api/film/${film.id}`)
+                film = res.data
+                this.filmDetail = {
+                    title: film.title,
+                    image: this.image_url+film.backdropimage,
+                    description: film.overview,
+                    releaseDate: film.releasedate,
+                    rating: film.note
+                }
+            }
+        }
     }
-  },
-  methods: {
-    inPanier(article_){
-      return this.panier.articles.findIndex(article => article.id == article_.id) != -1
-    },
-    addArticle (newArticle) {
-      this.$emit('add-article', newArticle)
-    },
-    deleteArticle (articleId) {
-      this.$emit('delete-article', articleId)
-    },
-    editArticle (article) {
-      this.editingArticle.id = article.id
-      this.editingArticle.name = article.name
-      this.editingArticle.description = article.description
-      this.editingArticle.image = article.image
-      this.editingArticle.price = article.price
-    },
-    sendEditArticle () {
-      this.$emit('update-article', this.editingArticle)
-      this.abortEditArticle()
-    },
-    abortEditArticle () {
-      this.editingArticle = {
-        id: -1,
-        name: '',
-        description: '',
-        image: '',
-        price: 0
-      }
-    },
-    addToPanier(articleId){
-      this.$emit('add-to-panier',articleId)
-    },
-    removeFromPanier(articleId){
-      this.$emit('remove-from-panier',articleId)
-    }
-  }
-}
 </script>
 
 <style scoped>
-article {
-  display: flex;
-}
+    .content{}
+    .sub{margin: 10px; margin-top: 20px;}
+    .movies {width:100%; display: flex; flex-wrap: wrap; margin: 0px 0px}
+    .film{ padding: 10px; margin: 5px; display: flex; justify-content: center; align-items: center; flex-direction: column}
+    .film .detail{
+        display: flex; justify-content: center; align-items: center; flex-direction: column; cursor: pointer;
+    }
+    .title{
+        color: white; text-align: center; margin-top: 10px; max-width: 200px;
+    }
+    .icons{
+        display: flex; align-items: center; justify-content: space-around; padding: 10px; width: 100%;
+    }
+    .far,.fa, .fas{font-size: 1.8em;}
+    .fa-heart{color: red}
+    .fa-thumbs-down{color: #00acee}
 
-.article-img {
-  flex: 1;
-}
-
-.article-img div {
-  width: 100px;
-  height: 100px;
-  background-size: cover;
-}
-
-.article-content {
-  flex: 3;
-}
-
-.article-title {
-  display: flex;
-  justify-content: space-between;
-}
-
-textarea {
-  width: 100%;
-}
+    .filmDetail{
+        display: flex; justify-content: center; align-items: center; flex-direction: column;
+    }
+    .section1{
+        padding: 10px;
+        display: flex; justify-content: center; align-items: center; flex-direction: column
+    }
+    .section2{margin: 30px}
+    .backImage{min-width: 100%; min-height: 200px}
+    .textZone{display: flex; justify-content: space-around; flex-direction: row;align-items: center; width: 100%}
+    .titleZone{color: black; text-align: center; margin: 15px}
+    .rating{color: #ffbd01; margin-left: 15px; transform: scale(1.3)}
 </style>

@@ -1,40 +1,48 @@
-const Home = window.httpVueLoader('./components/Home.vue')
-const Panier = window.httpVueLoader('./components/Panier.vue')
+const Main = window.httpVueLoader('./components/Main.vue')
 const Register = window.httpVueLoader('./components/Register.vue')
 const Login = window.httpVueLoader('./components/Login.vue')
+const Home = window.httpVueLoader('./components/Home.vue')
+const Likes = window.httpVueLoader('./components/Likes.vue')
+const Deceptions = window.httpVueLoader('./components/Deceptions.vue')
+const Contact = window.httpVueLoader('./components/Contact.vue')
 
 const routes = [
-  { path: '/', component: Home },
-  { path: '/panier', component: Panier },
+  {
+    path: '/', component: Main,
+    children: [
+      {path: "/accueil", component: Home},
+      {path: "/likes", component: Likes},
+      {path: "/deceptions", component: Deceptions},
+      {path: "/contact", component: Contact},
+    ]
+  },
   { path: '/register', component: Register },
   { path: '/login', component: Login },
-  
 ]
 
 const router = new VueRouter({
   routes
 })
 
-var app = new Vue({
+let app = new Vue({
   router,
   el: '#app',
   data: {
     user: {},
-    articles: [],
-    panier: {
-      createdAt: null,
-      updatedAt: null,
-      articles: []
-    }
+    likes: [],
+    deceptions: [],
+    films: [],
+    image_url: "https://image.tmdb.org/t/p/w300"
   },
+
   async mounted () {
-    const res = await axios.get('/api/articles')
-    this.articles = res.data
-    const res2 = await axios.get('/api/panier')
+    const res = await axios.get('/api/film/all')
+    this.films = res.data
+   /*/ const res2 = await axios.get('/api/panier')
     this.panier = res2.data
     const res3 = await axios.get('/api/me')
     this.user = res3.data
-    console.log(this.user)
+    console.log(this.user)*/
   },
   methods: {
     async addArticle (article) {
@@ -68,21 +76,22 @@ var app = new Vue({
     },
     async register(user){
       try{
-        const res = await axios.post('/api/register', user)
-        alert(res.data.message)
+        const res = await axios.post('/api/user/register', user)
+       // alert(res.data.message)
+        const res3 = await axios.get('/api/user/me')
+        this.user = res3.data
+        router.push("/")
       }catch(e){
         alert(e.response.data.error)
       }
     },
     async login(user){
       try{
-        const res = await axios.post('/api/login', user)
-        alert(res.data.message)
-        const res3 = await axios.get('/api/me')
+        const res = await axios.post('/api/user/login', user)
+        //alert(res.data.message)
+        const res3 = await axios.get('/api/user/me')
         this.user = res3.data
         router.push("/")
-
-
       }catch(e){
         alert(e.response.data.error)
       }
