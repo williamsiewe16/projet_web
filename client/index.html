@@ -8,6 +8,8 @@
         <script src="https://cdn.jsdelivr.net/npm/http-vue-loader/src/httpVueLoader.js"></script>
         <script src="https://cdn.jsdelivr.net/npm/vue-router/dist/vue-router.js"></script>
         <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+        <link rel="preconnect" href="https://fonts.gstatic.com">
+        <link href="https://fonts.googleapis.com/css2?family=Pacifico&display=swap" rel="stylesheet">
         <!--===============================================================================================-->
         <link rel="stylesheet" type="text/css" href="./src/vendor/bootstrap/css/bootstrap.css">
         <!--===============================================================================================-->
@@ -20,18 +22,18 @@
     <body>
         <div id="app">
             <router-view
+                    :user="user"
                     :likes="likes"
                     :films="films"
                     :deceptions="deceptions"
                     :image_url="image_url"
-                    @add-article="addArticle"
-                    @delete-article="deleteArticle"
-                    @update-article="updateArticle"
-                    @add-to-panier="addToPanier"
-                    @remove-from-panier="removeFromPanier"
-                    @update-from-panier="updateFromPanier"
+                    @like="like"
+                    @dislike="dislike"
+                    @add-to-deception="addToDeception"
+                    @remove-from-deception="removeFromDeception"
                     @register="register"
                     @login="login"
+                    @logout="logout"
                     @pay="pay"
             ></router-view>
         </div>

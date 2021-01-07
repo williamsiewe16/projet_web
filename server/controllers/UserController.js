@@ -73,6 +73,10 @@ module.exports = {
             }
         }
     },
+    logout: async(req,res) => {
+        req.session.destroy()
+        res.send({})
+    },
     me: async (req, res) => {
         // l'utilisateur est renvoyé
         res.status(200).json(req.user)
@@ -83,7 +87,7 @@ module.exports = {
 
         // Récupération de la liste des favoris d'un utilisateur
         let result = await client.query({ // notez le "await" car la fonction est asynchrone
-            text: "SELECT * FROM films INNER JOIN likes on films.id = likes.film_id WHERE user_id=$1",
+            text: "SELECT film_id FROM likes WHERE user_id=$1",
             values: [user.id]
         })
         res.status(200).json(result.rows)
@@ -92,11 +96,12 @@ module.exports = {
         //récupération du user connecté
         let user = req.user
 
-        // Récupération de la liste déceptions d'un utilisateur
+        // Récupération de la liste des déceptions d'un utilisateur
         let result = await client.query({ // notez le "await" car la fonction est asynchrone
-            text: "SELECT * FROM films INNER JOIN deceptions on films.id = deceptions.film_id WHERE user_id=$1",
-            values: [1]
+            text: "SELECT film_id FROM deceptions WHERE user_id=$1",
+            values: [user.id]
         })
+
         res.status(200).json(result.rows)
     },
     test: async (req,res,next) => {

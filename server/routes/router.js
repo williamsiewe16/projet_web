@@ -20,6 +20,9 @@ let router = (() => {
     /** Inscription */
     router.route('/user/register').post(UserController.register)
 
+    /** déconnexion */
+    router.route('/user/logout').post(UserController.logout)
+
     /** Récupération de l'utilisateur connecté */
     router.route('/user/me').get(checkAuth,UserController.me)
 
@@ -47,7 +50,7 @@ let router = (() => {
     router.route('/film/:id/dislike').delete(checkAuth,FilmController.dislike)
 
     /** Noter un film */
-    router.route('/film/:id/rate').put(/*checkAuth,*/FilmController.rate)
+    router.route('/film/:id/rate').put(checkAuth,FilmController.rate)
 
     /** Ajouter un film à sa liste de déceptions */
     router.route('/film/:id/addToDeception').post(checkAuth,FilmController.addToDeception)

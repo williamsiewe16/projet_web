@@ -5,11 +5,31 @@
         <!-- HEADER -->
         <div id="header">
           <div class="row-1">
-            <h3><b>Cine <span>World</span></b></h3>
+            <h2><b>Central <span>Cinema</span></b></h2>
+            <!-- Icone de l'utilisateur -->
+            <div class="user" v-if="user.id">
+              <li class="nav-item admin-zone dropdown has-arrow">
+                <a href="#" class="dropdown-toggle nav-link user-link" data-toggle="dropdown">
+                        <span class="user-img">
+                            <img class="rounded-circle" src="../src/images/user.jpg" width="35" alt="Admin">
+							<span class="status- online"></span>
+                        </span>
+                  <span style="font-size: 1.2em">{{user.pseudo}}</span>
+                </a>
+                <div class="dropdown-menu" style="cursor: pointer">
+                  <span class="dropdown-item" @click="logout">Se déconnecter</span>
+                </div>
+              </li>
+            </div>
+            <!-- Lien de connexion et d'inscription -->
+            <div v-else class="links">
+              <router-link to="/login"><span>Se connecter</span></router-link>
+              <router-link to="/register"><span class="register">S'inscrire</span></router-link>
+            </div>
           </div>
           <div class="row-2">
             <ul>
-              <router-link :to="menu.path" v-for="menu in menus" :key="menu.id">
+              <router-link :to="menu.path" v-for="menu in menus" :key="menu.id" :style="user.id ? 'flex: 1' : ''">
                 <li :class="activeId == menu.id ? 'active': ''" @click="activeId = menu.id">{{menu.title}}</li>
               </router-link>
             </ul>
@@ -30,10 +50,15 @@
             </div>
           </div> -->
           <router-view
+                  :user="user"
                   :likes="likes"
                   :films="films"
                   :deceptions="deceptions"
                   :image_url="image_url"
+                  @like="like"
+                  @dislike="dislike"
+                  @add-to-deception="addToDeception"
+                  @remove-from-deception="removeFromDeception"
           ></router-view>
         </div>
         <!-- FOOTER -->
@@ -60,6 +85,7 @@
 module.exports = {
   components: {},
   props: {
+    user: Object,
     likes: { type: Array, default: [] },
     deceptions: { type: Array },
     films: { type: Array },
@@ -67,46 +93,36 @@ module.exports = {
   },
   data () {
     return {
-      menus: [{id: 0, title: "Accueil", path: "/accueil"}, {id: 1, title: "Mes Favoris", path: "/likes"}, {id: 2, title: "Mes Déceptions", path: "/deceptions"}, {id: 3, title: "Contacts", path: "/contact"}],
       activeId: 0
     }
   },
+  computed: {
+    menus(){
+      let menus = [{id: 0, title: "Accueil", path: "/accueil"}]
+      this.user.id ? menus.push({id: 1, title: "Mes Favoris", path: "/likes"}) : ""
+      this.user.id ? menus.push({id: 2, title: "Mes Déceptions", path: "/deceptions"}) : ""
+      menus.push({id: 3, title: "Contacts", path: "/contact"})
+      return menus
+    }
+  },
   methods: {
-    inPanier(article_){
-      return this.panier.articles.findIndex(article => article.id == article_.id) != -1
-    },
-    addArticle (newArticle) {
-      this.$emit('add-article', newArticle)
-    },
-    deleteArticle (articleId) {
-      this.$emit('delete-article', articleId)
-    },
-    editArticle (article) {
-      this.editingArticle.id = article.id
-      this.editingArticle.name = article.name
-      this.editingArticle.description = article.description
-      this.editingArticle.image = article.image
-      this.editingArticle.price = article.price
-    },
-    sendEditArticle () {
-      this.$emit('update-article', this.editingArticle)
-      this.abortEditArticle()
-    },
-    abortEditArticle () {
-      this.editingArticle = {
-        id: -1,
-        name: '',
-        description: '',
-        image: '',
-        price: 0
+    logout () {
+      if (this.user.id) {
+        this.$emit('logout')
       }
     },
-    addToPanier(articleId){
-      this.$emit('add-to-panier',articleId)
+    like (id) {
+      this.$emit('like',id)
     },
-    removeFromPanier(articleId){
-      this.$emit('remove-from-panier',articleId)
-    }
+    dislike (id) {
+      this.$emit('dislike',id)
+    },
+    addToDeception (id) {
+      this.$emit('add-to-deception',id)
+    },
+    removeFromDeception (id) {
+      this.$emit('remove-from-deception',id)
+    },
   }
 }
 </script>
@@ -125,7 +141,7 @@ module.exports = {
   #main {width:90vw;margin:0 auto;font-size:0.875em; background-color: #333333; min-height: 100vh}
   #header {height:171px;margin-bottom:-8px; padding: 5px}
   #footer {background:url("../src/images/pexels-nathan-engel-436413.jpg") repeat-x left top #bfbfbf;color:#1d1d1d;font-size:.86em;line-height:1.667em;text-align:center; width: 90vw;
-    position: fixed; bottom: 0px}
+    position: fixed; bottom: 0px;}
   /* ALIGMENT */
   .fleft {float:left}
   .fright {float:right}
@@ -138,14 +154,12 @@ module.exports = {
   .container {width:100%}
   /* TAILING */
   .tail-top {background-color: #f2f2f2}
-  .tail-bottom {background:url(images/tail-bottom.gif) left bottom repeat-x}
   /* FORMS */
   #contacts-form {clear:right;width:842px;overflow:hidden}
   #contacts-form fieldset {border:none;float:left}
   #contacts-form .field {clear:both}
   #contacts-form label {float:left;width:112px !important;width:109px;line-height:18px;padding-bottom:8px;color:#fff}
   #contacts-form input {width:293px;padding:1px 0 1px 3px;background:#000;border:1px solid #3a3a3a;color:#fff}
-  #contacts-form textarea {width:674px;height:174px;padding:2px 28px 1px 28px;background:url(images/textarea-bg.gif) no-repeat left top;border:0;color:#fff;margin-bottom:15px;overflow:auto}
   #contacts-form .link2 {float:right}
   /* LISTS */
   .list {margin-top:-30px}
@@ -154,7 +168,6 @@ module.exports = {
   .list li a {text-decoration:none}
   .list li a:hover {color:#d72a18}
   .sitemap-list {padding-bottom:25px}
-  .sitemap-list li {padding:0 0 0 10px;line-height:1.714em;background:url(images/arrow.gif) no-repeat left 8px}
   .sitemap-list li a {color:#d72a18}
   /* OTHER */
   .img-box1 {width:100%;overflow:hidden;line-height:1.714em;padding:10px 0 12px 0}
@@ -170,35 +183,30 @@ module.exports = {
   /* TXT, LINKS, LINES, TITLES */
   a {color:#e1e1e1;outline:none}
   a:hover {text-decoration:none}
-  h2 {font-size:30px;line-height:1.2em;color:#1d1d1d;text-transform:uppercase;margin-bottom:12px}
+  h2 {font-size:30px;line-height:1.2em;color:grey;margin-bottom:12px; font-family: 'Pacifico', sans-serif}
   h2 span {display:block;font-size:40px;color:#2c6d9a}
   h3 {font-size:30px;line-height:1.2em;color:#bfbfbf;margin-bottom:20px}
   h3 b {color:#e1e1e1;font-weight:normal}
   h3 span {color:#eeac13}
+  .user{transform: translateY(-20%)}
   h4 {font-size:20px;line-height:1.2em;letter-spacing:-1px;color:#2c6d9a;margin-bottom:18px}
-  .link1 {display:block;float:left;background:url(images/link1-right.png) no-repeat right top;color:#fff;text-decoration:none;line-height:1em;cursor:pointer}
   .link1:hover span {text-decoration:underline}
-  .link1 span {display:block;float:left;padding:0 5px;background:url(images/link1-left.png) no-repeat left top}
-  .link1 span span {display:block;background:url(images/link1-tail.gif) repeat-x left top;padding:8px 15px}
-  .link2 {display:block;float:left;background:url(images/link2-right.gif) no-repeat right top;color:#fff;cursor:pointer;text-decoration:none;line-height:1em}
   .link2:hover span {text-decoration:underline}
-  .link2 span {display:block;float:left;padding:0 6px;background:url(images/link2-left.gif) no-repeat left top}
-  .link2 span span {display:block;background:url(images/link2-tail.gif) repeat-x left top;padding:9px 15px 10px 15px}
-  .line-hor {overflow:hidden;font-size:0;line-height:0;width:918px;height:8px;margin-left:11px;background:url(images/line-hor.gif) repeat-x left top;z-index:1;position:relative}
   /* BOXES */
   .box {background:#aaaaaa;width:100%;margin-top:-3px}
-  .box .border-left {background:url(images/border-left.gif) repeat-y left top}
-  .box .border-right {background:url(images/border-right.gif) repeat-y right top}
   .box .inner {padding:28px 50px 25px 50px}
   /* HEADER */
-  #header .row-1 {height:112px;width:100%;overflow:hidden; display: flex; align-items: center}
+  #header .row-1 {height:112px;width:100%;overflow:hidden; display: flex; align-items: center; justify-content: space-between;}
   #header .row-1 .fleft {font-size:40px;line-height:1.2em;padding:26px 0 0 47px}
   #header .row-1 .fleft a {text-decoration:none}
   #header .row-1 ul {padding:49px 60px 0 0;float:right}
   #header .row-1 ul li {float:left;padding-left:54px}
+  .links span {color: white; padding: 5px; transition: color 0.5s}
+  .links span:hover {color: grey}
+  .links .register {border-left: 1px solid white}
   #header .row-2 {height:51px}
-  #header .row-2 ul {width:100%;overflow:hidden; display: flex}
-  #header .row-2 ul a {flex: 1}
+  #header .row-2 ul {width:100%;overflow:hidden; display: flex; justify-content: center}
+  #header .row-2 ul a {}
   #header .row-2 ul li {transition: background-color 0.6s; color: white;cursor:pointer;font-size:15px;margin-right:5px;background-color:#000; padding: 6px; border-radius: 5px; text-align: center}
   #header .row-2 ul li:hover {background-color: #eeac13 }
   #header .row-2 ul .active {background-color: #eeac13 }
@@ -208,8 +216,6 @@ module.exports = {
   /* CONTENT */
   .ic, .ic a {border:0;float:right;background:#f00;color:#f00;width:50%;line-height:10px;font-size:10px;margin:-50% 0 0 0;overflow:hidden;padding:0}
   /* FOOTER */
-  #footer .left {background:url(images/footer-left.gif) no-repeat left top}
-  #footer .right {min-height:89px;height:auto !important;height:89px;background:url(images/footer-right.gif) no-repeat right top;text-align:center}
   #footer .inside {padding:13px 0}
   #footer .inside div{display: flex; justify-content: center; align-items: center; margin: 20px}
   #footer .inside div a i {margin: 8px; font-size: 1.5em}
@@ -217,11 +223,10 @@ module.exports = {
   #footer .inside div a:nth-child(2) i {color: #00acee}
   #footer .inside div a:nth-child(3) i {color: #ff3763}
   #footer a {color:#2c6d9a}
-  #slogan {width:940px;height:322px;position:relative;background:url(images/banner-bg.gif) no-repeat left top;color:#1d1d1d}
-  #slogan .image {position:absolute;right:-30px;top:-11px;z-index:100;width:572px;height:348px;background:url(images/banner-img.png) no-repeat left top}
   #slogan p {margin-bottom:23px}
   #slogan .inside {padding:36px 0 0 50px;width:320px}
-  #page1 #content .box {margin:0}
+  #content{padding-bottom: 150px}
+  #page1 #content .box {margin:0; padding-bottom: 600px}
   #page1 #header .row-2 ul li a {height:59px}
   #page1 #header .row-2 ul li.last a:hover {position:relative;z-index:2}
 </style>

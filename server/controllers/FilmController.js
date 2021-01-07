@@ -144,10 +144,11 @@ module.exports = {
             if(!check){
                 // On calcule la note du film en faisant la moyenne des notes données par chaque utilisateur
                 let result = await client.query({ // notez le "await" car la fonction est asynchrone
-                    text: "SELECT film_id,AVG(rating) as note FROM ratings WHERE film_id=$1 GROUP BY film_id",
+                    text: "SELECT film_id, AVG(rating) as note, count(*) as nombreNotes FROM ratings WHERE film_id=$1 GROUP BY film_id",
                     values: [film.id]
                 })
                 film.note = result.rows[0] ? Math.round(result.rows[0].note*100)/100 : 0
+                film.nombrenotes = result.rows[0] ? result.rows[0].nombrenotes : 0
             }
             res.status(200).json(film)
         }

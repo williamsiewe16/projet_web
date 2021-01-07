@@ -11,12 +11,12 @@ const routes = [
     path: '/', component: Main,
     children: [
       {path: "/accueil", component: Home},
-      {path: "/likes", component: Likes},
+      {path: "/likes", component: Likes },
       {path: "/deceptions", component: Deceptions},
       {path: "/contact", component: Contact},
     ]
   },
-  { path: '/register', component: Register },
+  { path: '/register', component: Register},
   { path: '/login', component: Login },
 ]
 
@@ -36,50 +36,31 @@ let app = new Vue({
   },
 
   async mounted () {
+    // On recupère la liste des films
     const res = await axios.get('/api/film/all')
     this.films = res.data
-   /*/ const res2 = await axios.get('/api/panier')
-    this.panier = res2.data
-    const res3 = await axios.get('/api/me')
-    this.user = res3.data
-    console.log(this.user)*/
+    this.getUserInfos()
   },
   methods: {
-    async addArticle (article) {
-      const res = await axios.post('/api/article', article)
-      this.articles.push(res.data)
-    },
-    async updateArticle (newArticle) {
-      await axios.put('/api/article/' + newArticle.id, newArticle)
-      const article = this.articles.find(a => a.id === newArticle.id)
-      article.name = newArticle.name
-      article.description = newArticle.description
-      article.image = newArticle.image
-      article.price = newArticle.price
-    },
-    async deleteArticle (articleId) {
-      await axios.delete('/api/article/' + articleId)
-      const index = this.articles.findIndex(a => a.id === articleId)
-      this.articles.splice(index, 1)
-    },
-    async addToPanier (id) {
-      const res = await axios.post('/api/panier', {id,quantity: 1})
-      this.panier = res.data.panier
-    },
-    async removeFromPanier(id){
-      const res = await axios.delete(`/api/panier/${id}`)
-      this.panier = res.data.panier
-    },    
-    async updateFromPanier(newArticle) {
-      const res = await axios.put(`/api/panier/${newArticle.id}`, newArticle)
-      this.panier = res.data.panier
+    async getUserInfos(){
+      // On recupère l'utilisateur connecté
+      const res2 = await axios.get('/api/user/me')
+      this.user = res2.data
+      try{
+        // On recupère les likes et les déceptions de l'utilisateur connecté
+        const res3 = await axios.get('/api/user/likes')
+        this.likes = res3.data.map(film => film.film_id)
+        const res4 = await axios.get('/api/user/deceptions')
+        this.deceptions = res4.data.map(film => film.film_id)
+      }catch (e) {
+        console.log("no user connected")
+      }
     },
     async register(user){
       try{
         const res = await axios.post('/api/user/register', user)
        // alert(res.data.message)
-        const res3 = await axios.get('/api/user/me')
-        this.user = res3.data
+        this.getUserInfos()
         router.push("/")
       }catch(e){
         alert(e.response.data.error)
@@ -89,12 +70,37 @@ let app = new Vue({
       try{
         const res = await axios.post('/api/user/login', user)
         //alert(res.data.message)
-        const res3 = await axios.get('/api/user/me')
-        this.user = res3.data
+        this.getUserInfos()
         router.push("/")
       }catch(e){
         alert(e.response.data.error)
       }
+    },
+    async logout(user){
+      try{
+        const res = await axios.post('/api/user/logout')
+        this.user = {}
+        router.push("/login")
+      }catch(e){
+        alert(e.response.data.error)
+      }
+    },
+    async like (id) {
+      const res = await axios.post(`/api/film/${id}/like`)
+      this.likes.push(id)
+    },
+    async dislike (id) {
+      const res = await axios.delete(`/api/film/${id}/dislike`)
+      this.likes = this.likes.filter(val => val != id)
+      //Vue.set(this.likes,this.likes.indexOf(id),)
+    },
+    async addToDeception (id) {
+      const res = await axios.post(`/api/film/${id}/addToDeception`)
+      this.deceptions.push(id)
+    },
+    async removeFromDeception (id) {
+      const res = await axios.delete(`/api/film/${id}/removeFromDeception`)
+      this.deceptions = this.deceptions.filter(val => val != id)
     },
     async pay(){
       try{

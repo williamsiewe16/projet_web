@@ -5,13 +5,13 @@
             <h3 class="sub">Fresh <span>Movies</span></h3>
             <ul class="movies">
                 <li v-for="film in films" :key="film.id" class="film">
-                    <div class="detail" data-toggle="modal" data-target="#filmModal" @click="afficherDetail(film)">
+                    <div class="detail" data-toggle="modal" :data-target="user.id ? '#filmModal' : ''" @click="user.id ? afficherDetail(film) : afficherErreur()">
                         <img :src="image_url+film.posterimage" width="60%" height="70%"/>
                         <h5 class="title">{{film.title}}</h5>
                     </div>
                     <div class="icons">
-                        <i class="far fa-heart"></i>
-                        <i class="far fa-thumbs-down"></i>
+                        <i :class="likes.indexOf(film.id) == -1 ? 'far fa-heart' : 'fas fa-heart iconClick'" @click="user.id ? (likes.indexOf(film.id) == -1 ? like(film) : '') : afficherErreur()"></i>
+                        <i :class="deceptions.indexOf(film.id) == -1 ? 'far fa-thumbs-down' : 'fas fa-thumbs-down iconClick'" @click="user.id ? (deceptions.indexOf(film.id) == -1 ? addToDeception(film) : '') : afficherErreur()"></i>
                     </div>
                 </li>
             </ul>
@@ -27,9 +27,12 @@
                             <h4 class="titleZone">{{filmDetail.title}}</h4>
                             <div class="textZone">
                                 <span style="color: grey">{{filmDetail.releaseDate}}</span>
-                                <div style="display: flex; justify-content: space-around">
-                                    <span>{{filmDetail.rating}}</span>
-                                    <div class="rating" data-rate-value=6></div>
+                                <div style="display: flex; flex-direction: column; text-align: center">
+                                    <div style="display: flex; justify-content: space-around">
+                                        <span>{{filmDetail.rating}}</span>
+                                        <div class="rating"></div>
+                                    </div>
+                                    <div>noté par {{filmDetail.ratingsNumber != 0 ? filmDetail.ratingsNumber : 'aucune'}} personne(s)</div>
                                 </div>
                             </div>
                         </div>
@@ -50,29 +53,42 @@
     module.exports =  {
         name: "Home",
         props: {
+            user: Object,
             films: { type: Array },
+            likes: { type: Array },
+            deceptions: { type: Array },
             image_url: String
         },
         data(){
             return{
                 filmDetail: {
+                    id: 0,
                     title: "",
                     image: "",
                     description: "",
                     releaseDate: "",
-                    rating: 0
+                    rating: 0,
+                    ratingsNumber: 0
+                },
+                ratingOptions: {
+                    max_value: 5, step_size: 0.5, initial_value: 3
                 }
             }
         },
+        watch: {
+          filmDetail({rating}){
+              let rater = $("<div class='rating'></div>\n")
+              $('.rating').replaceWith(rater)
+              rater.rate({...this.ratingOptions, initial_value: rating})
+          }
+        },
         mounted(){
-            $(".rating").rate();
-            let options = {
-                max_value: 6,
-                step_size: 0.5,
-            }
-            $(".rating").rate(options);
-            $(".rating").on("change", function(ev, data){
-                alert(data.to);
+            let that = this
+            $(".rating").rate(this.ratingOptions);
+            $(".rating").parent().on("change",".rating" ,async function(ev, data){
+                let res = await axios.put(`/api/film/${that.filmDetail.id}/rate`,{rating: data.to})
+                let film = {...that.filmDetail, rating: data.to}
+                that.afficherDetail(film)
             });
         },
         methods: {
@@ -80,22 +96,38 @@
                 let res = await axios.get(`/api/film/${film.id}`)
                 film = res.data
                 this.filmDetail = {
+                    id: film.id,
                     title: film.title,
                     image: this.image_url+film.backdropimage,
                     description: film.overview,
                     releaseDate: film.releasedate,
-                    rating: film.note
+                    rating: film.note,
+                    ratingsNumber: film.nombrenotes
                 }
+            },
+            like ({id}) {
+                this.$emit('like',id)
+            },
+            addToDeception ({id}) {
+                this.$emit('add-to-deception',id)
+            },
+            afficherErreur(){
+                if(confirm("veuillez-vous connecter pour avoir accès aux fonctionnalités du site"))
+                    this.$router.push("/login")
             }
         }
     }
 </script>
 
 <style scoped>
-    .content{}
     .sub{margin: 10px; margin-top: 20px;}
     .movies {width:100%; display: flex; flex-wrap: wrap; margin: 0px 0px}
-    .film{ padding: 10px; margin: 5px; display: flex; justify-content: center; align-items: center; flex-direction: column}
+    .film{ padding: 10px; margin: 5px; display: flex; justify-content: center; align-items: center; flex-direction: column; animation: filmAnimation 1s; transition: transform 0.5s}
+    .film:hover {transform: scale(1.1)}
+    @keyframes filmAnimation {
+        from{opacity: 0; transform: scale(0) /*translateY(-50%)*/}
+        to{opacity: 1; transform: scale(1)/*translateY(0)*/}
+    }
     .film .detail{
         display: flex; justify-content: center; align-items: center; flex-direction: column; cursor: pointer;
     }
@@ -105,13 +137,19 @@
     .icons{
         display: flex; align-items: center; justify-content: space-around; padding: 10px; width: 100%;
     }
-    .far,.fa, .fas{font-size: 1.8em;}
+    .far,.fa, .fas{font-size: 1.8em; cursor: pointer;}
     .fa-heart{color: red}
     .fa-thumbs-down{color: #00acee}
-
+    .iconClick{animation: iconClickAnimation 0.5s}
+    @keyframes iconClickAnimation {
+        0%{transform: scale(1)}
+        50%{transform: scale(1.4)}
+        100%{transform: scale(1)}
+    }
     .filmDetail{
         display: flex; justify-content: center; align-items: center; flex-direction: column;
     }
+
     .section1{
         padding: 10px;
         display: flex; justify-content: center; align-items: center; flex-direction: column

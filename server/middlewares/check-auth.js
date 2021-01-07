@@ -13,6 +13,7 @@ sera accessible dans req.user
  */
 module.exports = async (req, res, next) => {
     let id = req.session.userId
+    console.log(id)
     const result = await client.query({ // notez le "await" car la fonction est asynchrone
         text: 'SELECT id,pseudo,email FROM users WHERE id=$1',
         values: [id]
