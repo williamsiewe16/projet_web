@@ -61,7 +61,7 @@ let app = new Vue({
         const res = await axios.post('/api/user/register', user)
        // alert(res.data.message)
         this.getUserInfos()
-        router.push("/")
+        router.push("/accueil")
       }catch(e){
         alert(e.response.data.error)
       }
@@ -71,7 +71,7 @@ let app = new Vue({
         const res = await axios.post('/api/user/login', user)
         //alert(res.data.message)
         this.getUserInfos()
-        router.push("/")
+        router.push("accueil")
       }catch(e){
         alert(e.response.data.error)
       }
