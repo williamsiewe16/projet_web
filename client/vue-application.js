@@ -8,7 +8,7 @@ const Contact = window.httpVueLoader('./components/Contact.vue')
 
 const routes = [
   {
-    path: '/', component: Main,
+    path: '/', component: Main, redirect: '/accueil',
     children: [
       {path: "/accueil", component: Home},
       {path: "/likes", component: Likes },

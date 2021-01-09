@@ -193,7 +193,7 @@ module.exports = {
   .link1:hover span {text-decoration:underline}
   .link2:hover span {text-decoration:underline}
   /* BOXES */
-  .box {background:#aaaaaa;width:100%;margin-top:-3px}
+  .box {width:100%;margin-top:-3px}
   .box .inner {padding:28px 50px 25px 50px}
   /* HEADER */
   #header .row-1 {height:112px;width:100%;overflow:hidden; display: flex; align-items: center; justify-content: space-between;}
